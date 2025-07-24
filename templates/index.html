@@ -45,21 +45,20 @@
       <input type="number" name="batch1_max" value="{{ request.form.get('batch1_max', 8) }}">
     </label><br>
 
-    <label>
+    <!-- 第二批和第三批改为左对齐 -->
+    <div class="batch-row">
       <input type="checkbox" name="enable_batch2" 
-        {% if request.form.get('enable_batch2', 'on') == 'on' %}checked{% endif %}> 启用第二批
-    </label>
-    <label>第二批人数: 
+        {% if request.form.get('enable_batch2', 'on') == 'on' %}checked{% endif %}>
+      <label>启用第二批 第二批人数:</label>
       <input type="number" name="batch2_max" value="{{ request.form.get('batch2_max', 6) }}">
-    </label><br>
+    </div>
 
-    <label>
+    <div class="batch-row">
       <input type="checkbox" name="enable_batch3" 
-        {% if request.form.get('enable_batch3', 'on') == 'on' %}checked{% endif %}> 启用第三批
-    </label>
-    <label>第三批人数: 
+        {% if request.form.get('enable_batch3', 'on') == 'on' %}checked{% endif %}>
+      <label>启用第三批 第三批人数:</label>
       <input type="number" name="batch3_max" value="{{ request.form.get('batch3_max', 3) }}">
-    </label><br>
+    </div>
 
     <button type="submit">计算</button>
   </form>
@@ -155,18 +154,16 @@ window.addEventListener('load', () => {
     showTab(tab);
 });
 
-// 动态体重输入管理（顺序修正版）
+// 动态体重输入管理
 function addWeight() {
   const container = document.getElementById("weights-container");
   const currentInputs = container.querySelectorAll('input[name^="weight"]');
   const nextIndex = currentInputs.length + 1;
-
   const newField = document.createElement("div");
   newField.innerHTML = `<label>体重${nextIndex}: 
       <input type="number" name="weight${nextIndex}" step="0.1">
     </label><br>`;
   container.appendChild(newField);
-
   localStorage.setItem('weightCount', nextIndex);
 }
 
