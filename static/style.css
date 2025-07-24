@@ -17,27 +17,21 @@ h1, h2, h3, h4 {
     font-weight: normal;
 }
 
-/* 普通按钮靠右 */
-button {
-    display: block;
-    margin: 10px 0 10px auto;
-    padding: 14px 22px;
-    font-size: 18px;
+button { 
+    padding: 14px 22px; 
+    font-size: 18px; 
+    margin: 10px 5px;
     background-color: #007BFF;
     color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
 }
+
 button:hover {
     background-color: #0056b3;
 }
 
-/* Tab 按钮横排 */
-.tab-button {
-    display: inline-block;
-    margin: 10px 5px;
-}
 input {
     font-size: 18px;
     padding: 8px;
