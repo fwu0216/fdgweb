@@ -34,8 +34,13 @@
         <label>体重3: <input type="number" name="weight3" step="0.1"></label><br>
       {% endif %}
     </div>
-    <button type="button" onclick="addWeight()">+ 添加患者</button><br><br>
 
+    <!-- 添加/减少患者按钮 -->
+    <div style="display:flex; gap:10px; margin:10px 0;">
+      <button type="button" onclick="addWeight()">+ 添加患者</button>
+      <button type="button" onclick="removePatient()">- 减少患者</button>
+    </div>
+    
     <label>第一批人数: 
       <input type="number" name="batch1_max" value="{{ request.form.get('batch1_max', 8) }}">
     </label><br>
@@ -205,6 +210,12 @@ function copySms() {
     navigator.clipboard.writeText(text).then(() => {
         alert("短信内容已复制！");
     });
+}
+function removePatient() {
+  const patientInputs = document.querySelectorAll('#calc-tab input[name="weights"]');
+  if (patientInputs.length > 1) {  // 至少保留一个输入框
+    patientInputs[patientInputs.length - 1].parentNode.remove();
+  }
 }
 </script>
 {% endblock %}
