@@ -1,14 +1,21 @@
 {% extends "layout.html" %}
 {% block content %}
 <h2>F18-FDG 分装计算器</h2>
-<form method="POST">
-  <label>体重 (空格分隔): <input type="text" name="weights"></label><br>
-  <label>系数 (默认0.15): <input type="text" name="coeff"></label><br>
+<form method="POST" id="weight-form">
+  <label>系数 (默认0.15): <input type="text" name="coeff" value="0.15"></label><br>
+  <div id="weights-container">
+    <label>体重1: <input type="number" name="weight1" step="0.1"></label><br>
+    <label>体重2: <input type="number" name="weight2" step="0.1"></label><br>
+    <label>体重3: <input type="number" name="weight3" step="0.1"></label><br>
+  </div>
+  <button type="button" onclick="addWeight()">+ 添加患者</button><br><br>
+
   <label>第一批人数: <input type="number" name="batch1_max" value="8"></label><br>
   <label><input type="checkbox" name="enable_batch2" checked> 启用第二批</label>
   <label>第二批人数: <input type="number" name="batch2_max" value="6"></label><br>
   <label><input type="checkbox" name="enable_batch3" checked> 启用第三批</label>
   <label>第三批人数: <input type="number" name="batch3_max" value="3"></label><br>
+
   <button type="submit">计算</button>
 </form>
 
@@ -35,4 +42,15 @@
     </table>
   {% endfor %}
 {% endif %}
+
+<script>
+let weightCount = 3;
+function addWeight() {
+    weightCount += 1;
+    const container = document.getElementById("weights-container");
+    const newField = document.createElement("div");
+    newField.innerHTML = `<label>体重${weightCount}: <input type="number" name="weight${weightCount}" step="0.1"></label><br>`;
+    container.appendChild(newField);
+}
+</script>
 {% endblock %}
