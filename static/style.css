@@ -1,7 +1,59 @@
-body { font-family: Arial, sans-serif; margin: 20px; background: #f4f4f4; }
-header { background: #333; color: white; padding: 10px; }
-header a { color: #ffd700; margin: 0 10px; }
-table { border-collapse: collapse; margin-top: 10px; background: white; }
-td, th { border: 1px solid #ccc; padding: 5px 10px; }
-fieldset { background: #fff; margin: 10px 0; padding: 10px; border-radius: 5px; }
-button { padding: 8px 12px; margin-top: 10px; }
+body { 
+    font-family: Arial, sans-serif; 
+    margin: 20px; 
+    background: #f4f4f4; 
+    font-size: 18px;
+}
+
+header { 
+    background: #333; 
+    color: white; 
+    padding: 10px; 
+}
+
+header a { 
+    color: #ffd700; 
+    margin: 0 10px; 
+    font-size: 18px;
+}
+
+table { 
+    border-collapse: collapse; 
+    margin-top: 10px; 
+    background: white; 
+    width: 100%;
+    font-size: 18px;
+}
+
+td, th { 
+    border: 1px solid #ccc; 
+    padding: 10px; 
+    text-align: center;
+}
+
+fieldset { 
+    background: #fff; 
+    margin: 10px 0; 
+    padding: 10px; 
+    border-radius: 5px; 
+}
+
+button { 
+    padding: 14px 22px; 
+    font-size: 18px; 
+    margin-top: 10px; 
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 5px;
+}
+
+input { 
+    font-size: 18px; 
+    padding: 8px;
+    margin: 4px 0;
+}
+
+h2, h3, h4 { 
+    font-size: 20px;
+}
