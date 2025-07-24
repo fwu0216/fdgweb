@@ -12,9 +12,9 @@
       {% set _ = weight_fields.append(val) %}
     {% endfor %}
     {% if weight_fields %}
-      {% for i, val in enumerate(weight_fields, start=1) %}
-        <label>体重{{ i }}: 
-          <input type="number" name="weight{{ i }}" step="0.1" value="{{ val }}">
+      {% for val in weight_fields %}
+        <label>体重{{ loop.index }}: 
+          <input type="number" name="weight{{ loop.index }}" step="0.1" value="{{ val }}">
         </label><br>
       {% endfor %}
     {% else %}
