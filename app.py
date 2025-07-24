@@ -85,7 +85,7 @@ def index():
                         scale = request.form.get(f"scale{i}", "")
                         arrive = request.form.get(f"arrive{i}", "")
                         # 使用圈数字
-                        sms_parts.append(f"第{circle_nums[i]}批需要FDG {dose}mCi，刻度到{scale}\n{arrive}左右送达")
+                        sms_parts.append(f"第{circle_nums[i-1]}批需要FDG {dose}mCi，刻度到{scale}\n{arrive}左右送达")
                 if sms_parts:
                     sms_text = "FDG\n" + "\n".join(sms_parts)
 
