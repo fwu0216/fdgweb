@@ -17,6 +17,7 @@
       <input type="text" name="coeff" value="{{ request.form.get('coeff', '0.15') }}">
     </label><br>
 
+    <!-- 体重输入区 -->
     <div id="weights-container">
       {% set weight_fields = [] %}
       {% for key, val in request.form.items() if key.startswith('weight') %}
@@ -40,9 +41,10 @@
       <button type="button" onclick="addWeight()">+ 添加患者</button>
       <button type="button" onclick="removePatient()">- 减少患者</button>
     </div>
-    
+
+    <!-- 批次设置 -->
     <label>第一批人数: 
-      <input type="number" name="batch1_max" value="{{ request.form.get('batch1_max', 8) }}">
+      <input type="number" id="batch1_max" name="batch1_max" value="{{ request.form.get('batch1_max', 8) }}">
     </label><br>
 
     <label>
@@ -88,6 +90,7 @@
     {% endfor %}
   {% endif %}
 </div>
+
 <!-- 订药短信生成 -->
 <div id="sms-tab" style="display:none;">
   <h3>廊坊订药短信生成</h3>
@@ -120,7 +123,7 @@
     <button type="button" onclick="copySms()">复制短信</button>
   {% endif %}
 
-  <!-- 注射时间表 -->
+  <!-- 固定注射时间表 -->
   <h4 style="margin-top:20px; text-align:center;">注射时间表</h4>
   <table>
     <tr><td>第1针</td><td>9:00</td></tr>
@@ -143,79 +146,75 @@
 </div>
 
 <script>
-// Tab 切换与保存
+// 动态标签页和表单保存
 function showTab(tab) {
-    document.getElementById('calc-tab').style.display = (tab === 'calc') ? 'block' : 'none';
-    document.getElementById('sms-tab').style.display = (tab === 'sms') ? 'block' : 'none';
-    localStorage.setItem('activeTab', tab);
+  document.getElementById('calc-tab').style.display = (tab === 'calc') ? 'block' : 'none';
+  document.getElementById('sms-tab').style.display = (tab === 'sms') ? 'block' : 'none';
+  localStorage.setItem('activeTab', tab);
 }
-window.addEventListener('load', () => {
-    const tab = localStorage.getItem('activeTab') || 'calc';
-    showTab(tab);
-});
 
-// 动态添加患者输入 + 数量保存
-let weightCount = {{ weight_fields|length if weight_fields else 3 }};
-function addWeight() {
-    weightCount += 1;
-    const container = document.getElementById("weights-container");
-    const newField = document.createElement("div");
-    newField.innerHTML = `<label>体重${weightCount}: 
-        <input type="number" name="weight${weightCount}" step="0.1">
-      </label><br>`;
-    container.appendChild(newField);
-    localStorage.setItem('weightCount', weightCount);
-}
-window.addEventListener('load', () => {
-    const savedCount = localStorage.getItem('weightCount');
-    if (savedCount && savedCount > weightCount) {
-        for (let i = weightCount + 1; i <= savedCount; i++) {
-            addWeight();
-        }
-    }
-});
-
-// 表单保存和恢复（防止切换时丢失）
 function saveFormData(formId, storageKey) {
-    const form = document.getElementById(formId);
-    localStorage.setItem(storageKey, new URLSearchParams(new FormData(form)).toString());
+  const form = document.getElementById(formId);
+  localStorage.setItem(storageKey, new URLSearchParams(new FormData(form)).toString());
 }
 function loadFormData(formId, storageKey) {
-    const saved = localStorage.getItem(storageKey);
-    if (saved) {
-        const form = document.getElementById(formId);
-        const params = new URLSearchParams(saved);
-        for (const [key, value] of params.entries()) {
-            const el = form.elements[key];
-            if (el) {
-                if (el.type === 'checkbox') {
-                    el.checked = true;
-                } else {
-                    el.value = value;
-                }
-            }
+  const saved = localStorage.getItem(storageKey);
+  if (saved) {
+    const form = document.getElementById(formId);
+    const params = new URLSearchParams(saved);
+    for (const [key, value] of params.entries()) {
+      const el = form.elements[key];
+      if (el) {
+        if (el.type === 'checkbox') {
+          el.checked = true;
+        } else {
+          el.value = value;
         }
+      }
     }
+  }
 }
-document.getElementById('calc-form').addEventListener('input', () => saveFormData('calc-form', 'calcForm'));
-document.getElementById('sms-form').addEventListener('input', () => saveFormData('sms-form', 'smsForm'));
+
+// 动态体重输入管理
+let weightCount = {{ weight_fields|length if weight_fields else 3 }};
+function addWeight() {
+  weightCount += 1;
+  const container = document.getElementById("weights-container");
+  const newField = document.createElement("div");
+  newField.innerHTML = `<label>体重${weightCount}: 
+      <input type="number" name="weight${weightCount}" step="0.1">
+    </label><br>`;
+  container.appendChild(newField);
+  localStorage.setItem('weightCount', weightCount);
+}
+
+function removePatient() {
+  const patientInputs = document.querySelectorAll('#calc-tab input[name^="weight"]');
+  if (patientInputs.length > 1) {
+    patientInputs[patientInputs.length - 1].parentNode.remove();
+    weightCount -= 1;
+    localStorage.setItem('weightCount', weightCount);
+  }
+}
+
+// 初始化页面
 window.addEventListener('load', () => {
-    loadFormData('calc-form', 'calcForm');
-    loadFormData('sms-form', 'smsForm');
+  const tab = localStorage.getItem('activeTab') || 'calc';
+  showTab(tab);
+  loadFormData('calc-form', 'calcForm');
+  loadFormData('sms-form', 'smsForm');
+  const savedCount = localStorage.getItem('weightCount');
+  if (savedCount && savedCount > weightCount) {
+    for (let i = weightCount + 1; i <= savedCount; i++) {
+      addWeight();
+    }
+  }
 });
 
-// 复制短信
+// 短信复制
 function copySms() {
-    const text = document.getElementById("sms-result").innerText;
-    navigator.clipboard.writeText(text).then(() => {
-        alert("短信内容已复制！");
-    });
-}
-function removePatient() {
-  const patientInputs = document.querySelectorAll('#calc-tab input[name="weights"]');
-  if (patientInputs.length > 1) {  // 至少保留一个输入框
-    patientInputs[patientInputs.length - 1].parentNode.remove();
-  }
+  const text = document.getElementById("sms-result").innerText;
+  navigator.clipboard.writeText(text).then(() => alert("短信内容已复制！"));
 }
 </script>
 {% endblock %}
