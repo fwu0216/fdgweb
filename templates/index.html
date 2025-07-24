@@ -1,130 +1,181 @@
-{% extends "layout.html" %}
-{% block content %}
-<div style="margin-bottom: 15px; text-align:center;">
-  <button type="button" class="tab-button" onclick="showTab('calc')">分装计算器</button>
-  <button type="button" class="tab-button" onclick="showTab('sms')">订药短信生成</button>
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>廊坊FDG订药工具</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script>
+        // 保存输入值到 localStorage
+        function saveInputs() {
+            const inputs = document.querySelectorAll("input, textarea");
+            inputs.forEach(input => {
+                if (input.type === "checkbox") {
+                    localStorage.setItem(input.name, input.checked);
+                } else {
+                    localStorage.setItem(input.name, input.value);
+                }
+            });
+        }
+
+        // 加载 localStorage 的值
+        function loadInputs() {
+            const inputs = document.querySelectorAll("input, textarea");
+            inputs.forEach(input => {
+                const value = localStorage.getItem(input.name);
+                if (value !== null) {
+                    if (input.type === "checkbox") {
+                        input.checked = (value === "true");
+                    } else {
+                        input.value = value;
+                    }
+                }
+            });
+        }
+
+        // 页面加载时恢复输入值
+        window.onload = loadInputs;
+    </script>
+</head>
+<body>
+<header>
+    <h1>廊坊FDG订药工具</h1>
+</header>
+
+<!-- 顶部标签按钮 -->
+<div style="text-align: center; margin: 15px 0;">
+    <button type="button" onclick="showTab('calc')">分装计算器</button>
+    <button type="button" onclick="showTab('sms')">订药短信生成</button>
 </div>
 
-<!-- 分装计算器 Tab -->
-<div id="calc-tab" class="tab">
-  <h2>F18-FDG 分装计算器</h2>
-  <form method="post">
-    <label>系数 (默认0.15): <input type="text" name="coeff" value="{{ request.form.get('coeff', 0.15) }}"></label><br>
+<!-- 分装计算器 -->
+<div id="calc-tab">
+    <h2>F18-FDG 分装计算器</h2>
+    <form method="post" oninput="saveInputs()">
+        <label>系数 (默认0.15):</label>
+        <input type="text" name="coeff" value="0.15"><br>
 
-    <div id="weights">
-      {% for i, val in enumerate(weight_fields, start=1) %}
-        <label>体重{{ i }}: <input type="number" name="weights" value="{{ val }}"></label><br>
-      {% endfor %}
-    </div>
-    <button type="button" onclick="addWeightField()">+ 添加患者</button>
-
-    <label>第一批人数: <input type="number" name="batch1_max" value="{{ request.form.get('batch1_max', 8) }}"></label><br>
-
-    <!-- 第二批 -->
-    <div class="batch-block">
-      <label class="checkbox-row">
-        <input type="checkbox" name="enable_batch2" {% if request.form.get('enable_batch2','on') == 'on' %}checked{% endif %}>
-        启用第二批
-      </label>
-      <label class="input-row">
-        人数：
-        <input type="number" name="batch2_max" value="{{ request.form.get('batch2_max', 6) }}">
-      </label>
-    </div>
-
-    <!-- 第三批 -->
-    <div class="batch-block">
-      <label class="checkbox-row">
-        <input type="checkbox" name="enable_batch3" {% if request.form.get('enable_batch3','on') == 'on' %}checked{% endif %}>
-        启用第三批
-      </label>
-      <label class="input-row">
-        人数：
-        <input type="number" name="batch3_max" value="{{ request.form.get('batch3_max', 3) }}">
-      </label>
-    </div>
-
-    <button type="submit">计算</button>
-  </form>
-
-  {% if error_msg %}
-    <p style="color:red; text-align:center;">错误: {{ error_msg }}</p>
-  {% endif %}
-
-  {% if results %}
-    {% for batch_name, batch_data in batches %}
-      <h3>{{ batch_name }} 总分装剂量: {{ "%.2f"|format(batch_data | sum(attribute="分装剂量(mCi)")) }} mCi</h3>
-      <table>
-        <tr>
-          <th>批次</th><th>编号</th><th>体重</th><th>注射时间</th><th>分装时间</th><th>分装剂量</th>
-        </tr>
-        {% for row in batch_data %}
-        <tr>
-          <td>{{ row["批次"] }}</td>
-          <td>{{ row["编号"] }}</td>
-          <td>{{ row["体重(kg)"] }}</td>
-          <td>{{ row["注射时间"] }}</td>
-          <td>{{ row["分装时间"] }}</td>
-          <td>{{ row["分装剂量(mCi)"] }}</td>
-        </tr>
+        <!-- 动态体重输入 -->
+        {% for val in weight_fields %}
+            <label>体重 {{ loop.index }}:</label>
+            <input type="text" name="weight{{ loop.index }}" value="{{ val }}"><br>
         {% endfor %}
-      </table>
+        <button type="button" onclick="addWeightField()">+ 添加患者</button><br>
+
+        <label>第一批人数:</label>
+        <input type="text" name="batch1_max" value="8"><br>
+
+        <div class="batch-setting">
+            <input type="checkbox" name="enable_batch2">
+            <label>启用第二批</label>
+            <label>人数:</label>
+            <input type="text" name="batch2_max" value="6">
+        </div>
+
+        <div class="batch-setting">
+            <input type="checkbox" name="enable_batch3">
+            <label>启用第三批</label>
+            <label>人数:</label>
+            <input type="text" name="batch3_max" value="3">
+        </div>
+
+        <button type="submit">计算</button>
+    </form>
+
+    {% if error_msg %}
+        <p style="color: red;">{{ error_msg }}</p>
+    {% endif %}
+
+    {% for batch_name, batch_data in batches %}
+        <h3>{{ batch_name }} 总分装剂量: {{ "%.2f"|format(batch_data|sum(attribute="分装剂量(mCi)")) }} mCi</h3>
+        <table>
+            <tr>
+                <th>批次</th>
+                <th>编号</th>
+                <th>体重(kg)</th>
+                <th>注射时间</th>
+                <th>分装时间</th>
+                <th>分装剂量(mCi)</th>
+            </tr>
+            {% for row in batch_data %}
+                <tr>
+                    <td>{{ row["批次"] }}</td>
+                    <td>{{ row["编号"] }}</td>
+                    <td>{{ row["体重(kg)"] }}</td>
+                    <td>{{ row["注射时间"] }}</td>
+                    <td>{{ row["分装时间"] }}</td>
+                    <td>{{ row["分装剂量(mCi)"] }}</td>
+                </tr>
+            {% endfor %}
+        </table>
     {% endfor %}
-  {% endif %}
 </div>
 
-<!-- 订药短信 Tab -->
-<div id="sms-tab" class="tab" style="display:none;">
-  <h2>廊坊FDG订药工具</h2>
-  <form id="sms-form">
-    {% for i, batch in enumerate(sms_batches, start=1) %}
-      <fieldset>
-        <legend>第{{ i }}批</legend>
-        <label class="checkbox-row">
-          <input type="checkbox" name="enabled{{ i }}" {% if batch.enabled %}checked{% endif %}> 启用
-        </label><br>
-        <label>FDG 剂量 (mCi): <input type="number" step="1" name="dose{{ i }}" value="{{ batch.dose }}"></label><br>
-        <label>刻度到时间: <input type="text" name="scale_time{{ i }}" value="{{ batch.scale_time }}"></label><br>
-        <label>送达时间: <input type="text" name="arrive_time{{ i }}" value="{{ batch.arrive_time }}"></label>
-      </fieldset>
-    {% endfor %}
-    <button type="button" onclick="generateSMS()">生成短信</button>
-  </form>
-  <div id="sms-output" style="margin-top:15px;">
-    <h3>短信内容</h3>
-    <pre id="sms-text"></pre>
-    <button type="button" onclick="copySMS()">复制短信</button>
-  </div>
+<!-- 订药短信生成器 -->
+<div id="sms-tab" style="display:none;">
+    <h2>廊坊订药短信生成</h2>
+    <form id="sms-form" oninput="saveInputs()">
+        {% for i in range(1, 4) %}
+        <fieldset>
+            <legend>第{{ i }}批</legend>
+            <div class="batch-setting">
+                <input type="checkbox" id="enable{{ i }}">
+                <label for="enable{{ i }}">启用</label>
+            </div>
+            <label>FDG 剂量 (mCi):</label>
+            <input type="text" id="dose{{ i }}" value=""><br>
+            <label>刻度到时间:</label>
+            <input type="text" id="scale{{ i }}" value=""><br>
+            <label>送达时间:</label>
+            <input type="text" id="deliver{{ i }}" value=""><br>
+        </fieldset>
+        {% endfor %}
+        <button type="button" onclick="generateSMS()">生成短信</button>
+    </form>
+    <div id="sms-result" style="margin-top:10px;">
+        <h3>短信内容</h3>
+        <pre id="sms-text"></pre>
+        <button type="button" onclick="copySMS()">复制短信</button>
+    </div>
 </div>
 
 <script>
-function addWeightField() {
-  const container = document.getElementById("weights");
-  const index = container.querySelectorAll("input").length + 1;
-  const div = document.createElement("div");
-  div.innerHTML = `<label>体重${index}: <input type="number" name="weights"></label><br>`;
-  container.appendChild(div);
-}
-function showTab(tab) {
-  document.getElementById('calc-tab').style.display = (tab === 'calc') ? 'block' : 'none';
-  document.getElementById('sms-tab').style.display = (tab === 'sms') ? 'block' : 'none';
-}
-function generateSMS() {
-  const form = document.getElementById("sms-form");
-  let text = "FDG\n";
-  for (let i = 1; i <= 3; i++) {
-    const enabled = form[`enabled${i}`].checked;
-    if (!enabled) continue;
-    const dose = form[`dose${i}`].value || 0;
-    const scale = form[`scale_time${i}`].value || "";
-    const arrive = form[`arrive_time${i}`].value || "";
-    text += `第${i}批需要FDG ${dose}mCi，刻度到${scale}\n${arrive}左右送达\n`;
-  }
-  document.getElementById("sms-text").innerText = text.trim();
-}
-function copySMS() {
-  const text = document.getElementById("sms-text").innerText;
-  navigator.clipboard.writeText(text).then(() => alert("已复制到剪贴板"));
-}
+    function showTab(tab) {
+        document.getElementById("calc-tab").style.display = (tab === 'calc') ? "block" : "none";
+        document.getElementById("sms-tab").style.display = (tab === 'sms') ? "block" : "none";
+    }
+
+    function addWeightField() {
+        const form = document.querySelector("form");
+        const count = document.querySelectorAll("input[name^='weight']").length + 1;
+        const label = document.createElement("label");
+        label.textContent = `体重 ${count}:`;
+        const input = document.createElement("input");
+        input.type = "text";
+        input.name = `weight${count}`;
+        form.insertBefore(label, form.querySelector("button[type='button']"));
+        form.insertBefore(input, form.querySelector("button[type='button']"));
+        form.insertBefore(document.createElement("br"), form.querySelector("button[type='button']"));
+    }
+
+    function generateSMS() {
+        let sms = "FDG\n";
+        for (let i = 1; i <= 3; i++) {
+            const enabled = document.getElementById(`enable${i}`).checked;
+            const dose = document.getElementById(`dose${i}`).value;
+            const scale = document.getElementById(`scale${i}`).value;
+            const deliver = document.getElementById(`deliver${i}`).value;
+            if (enabled) {
+                sms += `第${i}批需要FDG ${dose}mCi，刻度到${scale}\n${deliver}左右送达\n`;
+            }
+        }
+        document.getElementById("sms-text").innerText = sms.trim();
+    }
+
+    function copySMS() {
+        const text = document.getElementById("sms-text").innerText;
+        navigator.clipboard.writeText(text).then(() => alert("短信已复制"));
+    }
 </script>
-{% endblock %}
+</body>
+</html>
