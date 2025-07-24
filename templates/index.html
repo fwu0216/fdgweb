@@ -2,14 +2,17 @@
 {% block content %}
 <h2>FDG 工具</h2>
 
-<div style="margin-bottom: 15px;">
+<div style="margin-bottom: 15px; text-align:center;">
   <button type="button" onclick="showTab('calc')">分装计算器</button>
   <button type="button" onclick="showTab('sms')">订药短信生成</button>
 </div>
 
+<!-- 分装计算器 -->
 <div id="calc-tab">
   <h3>F18-FDG 分装计算器</h3>
   <form method="POST" id="calc-form">
+    <input type="hidden" name="form_type" value="calc">
+
     <label>系数 (默认0.15): 
       <input type="text" name="coeff" value="{{ request.form.get('coeff', '0.15') }}">
     </label><br>
@@ -56,7 +59,7 @@
     <button type="submit">计算</button>
   </form>
 
-  {% if error_msg %}
+  {% if error_msg and request.form.get('form_type') == 'calc' %}
     <p style="color: red; font-size:18px;">{{ error_msg }}</p>
   {% endif %}
 
@@ -81,24 +84,26 @@
   {% endif %}
 </div>
 
+<!-- 订药短信生成 -->
 <div id="sms-tab" style="display:none;">
   <h3>廊坊订药短信生成</h3>
   <form method="POST" id="sms-form">
+    <input type="hidden" name="form_type" value="sms">
     {% for i in range(1, 4) %}
       <fieldset>
         <legend>第{{ i }}批</legend>
         <label>
           <input type="checkbox" name="enable_batch{{ i }}" 
-            {% if batches and i <= batches|length and batches[i-1]["enabled"] %}checked{% endif %}> 启用
+            {% if default_batches[i-1]["enabled"] %}checked{% endif %}> 启用
         </label><br>
         <label>FDG 剂量 (mCi): 
-          <input type="number" name="dose{{ i }}" value="{{ batches[i-1]['dose'] if batches and i <= batches|length else '' }}">
+          <input type="number" name="dose{{ i }}" value="{{ default_batches[i-1]['dose'] }}">
         </label><br>
         <label>刻度到时间: 
-          <input type="text" name="scale{{ i }}" value="{{ batches[i-1]['scale_time'] if batches and i <= batches|length else '' }}">
+          <input type="text" name="scale{{ i }}" value="{{ default_batches[i-1]['scale_time'] }}">
         </label><br>
         <label>送达时间: 
-          <input type="text" name="arrive{{ i }}" value="{{ batches[i-1]['arrive_time'] if batches and i <= batches|length else '' }}">
+          <input type="text" name="arrive{{ i }}" value="{{ default_batches[i-1]['arrive_time'] }}">
         </label><br>
       </fieldset>
     {% endfor %}
@@ -113,6 +118,7 @@
 </div>
 
 <script>
+// Tab 切换与保存
 function showTab(tab) {
     document.getElementById('calc-tab').style.display = (tab === 'calc') ? 'block' : 'none';
     document.getElementById('sms-tab').style.display = (tab === 'sms') ? 'block' : 'none';
@@ -123,7 +129,28 @@ window.addEventListener('load', () => {
     showTab(tab);
 });
 
-// 本地存储表单数据 (分装计算器 + 短信生成)
+// 动态添加患者输入 + 数量保存
+let weightCount = {{ weight_fields|length if weight_fields else 3 }};
+function addWeight() {
+    weightCount += 1;
+    const container = document.getElementById("weights-container");
+    const newField = document.createElement("div");
+    newField.innerHTML = `<label>体重${weightCount}: 
+        <input type="number" name="weight${weightCount}" step="0.1">
+      </label><br>`;
+    container.appendChild(newField);
+    localStorage.setItem('weightCount', weightCount);
+}
+window.addEventListener('load', () => {
+    const savedCount = localStorage.getItem('weightCount');
+    if (savedCount && savedCount > weightCount) {
+        for (let i = weightCount + 1; i <= savedCount; i++) {
+            addWeight();
+        }
+    }
+});
+
+// 表单保存和恢复（防止切换时丢失）
 function saveFormData(formId, storageKey) {
     const form = document.getElementById(formId);
     localStorage.setItem(storageKey, new URLSearchParams(new FormData(form)).toString());
@@ -151,18 +178,6 @@ window.addEventListener('load', () => {
     loadFormData('calc-form', 'calcForm');
     loadFormData('sms-form', 'smsForm');
 });
-
-// 添加患者输入
-let weightCount = {{ weight_fields|length if weight_fields else 3 }};
-function addWeight() {
-    weightCount += 1;
-    const container = document.getElementById("weights-container");
-    const newField = document.createElement("div");
-    newField.innerHTML = `<label>体重${weightCount}: 
-        <input type="number" name="weight${weightCount}" step="0.1">
-      </label><br>`;
-    container.appendChild(newField);
-}
 
 // 复制短信
 function copySms() {
