@@ -73,6 +73,7 @@
 {% endif %}
 
 <script>
+// 动态添加患者体重输入
 let weightCount = {{ weight_fields|length if weight_fields else 3 }};
 function addWeight() {
     weightCount += 1;
@@ -83,5 +84,27 @@ function addWeight() {
       </label><br>`;
     container.appendChild(newField);
 }
+
+// 使用 localStorage 保存和恢复表单数据
+const form = document.getElementById('weight-form');
+form.addEventListener('input', () => {
+    localStorage.setItem('calcForm', new FormData(form).toString());
+});
+window.addEventListener('load', () => {
+    const saved = localStorage.getItem('calcForm');
+    if (saved) {
+        const params = new URLSearchParams(saved);
+        for (const [key, value] of params.entries()) {
+            const el = form.elements[key];
+            if (el) {
+                if (el.type === 'checkbox') {
+                    el.checked = true;
+                } else {
+                    el.value = value;
+                }
+            }
+        }
+    }
+});
 </script>
 {% endblock %}
