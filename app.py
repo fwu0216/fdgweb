@@ -47,18 +47,25 @@ def index():
     if request.method == "POST":
         try:
             coeff = float(request.form.get("coeff", 0.15))
-            weights_input = request.form.get("weights", "").strip()
-            if not weights_input:
-                raise ValueError("请至少输入一个体重（用空格分隔）")
+            # 获取所有动态生成的体重输入
+            weights = []
+            for key, value in request.form.items():
+                if key.startswith("weight") and value.strip():
+                    try:
+                        weights.append(float(value))
+                    except ValueError:
+                        continue  # 跳过非数字
 
-            weights = [float(x) for x in weights_input.split() if x.strip()]
+            if not weights:
+                raise ValueError("请至少输入一个有效的体重（数字）")
+
             batch1_max = int(request.form.get("batch1_max", 8))
             enable_batch2 = request.form.get("enable_batch2") == "on"
             batch2_max = int(request.form.get("batch2_max", 6)) if enable_batch2 else 0
             enable_batch3 = request.form.get("enable_batch3") == "on"
             batch3_max = int(request.form.get("batch3_max", 3)) if enable_batch3 else 0
 
-            # 避免总人数超过体重数量
+            # 避免人数超过体重数量
             total_requested = batch1_max + (batch2_max if enable_batch2 else 0) + (batch3_max if enable_batch3 else 0)
             if total_requested > len(weights):
                 weights = weights[:total_requested]
