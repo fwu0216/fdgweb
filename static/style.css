@@ -17,21 +17,29 @@ h1, h2, h3, h4 {
     font-weight: normal;
 }
 
+/* 按钮 */
 button { 
-    padding: 14px 22px; 
-    font-size: 18px; 
-    margin: 10px 5px;
+    display: block;
+    margin: 10px 0 10px auto;
+    padding: 14px 22px;
+    font-size: 18px;
     background-color: #007BFF;
     color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
 }
-
 button:hover {
     background-color: #0056b3;
 }
 
+/* Tab 横排按钮 */
+.tab-button {
+    display: inline-block;
+    margin: 10px 5px;
+}
+
+/* 输入框 */
 input {
     font-size: 18px;
     padding: 8px;
@@ -40,7 +48,8 @@ input {
     max-width: 200px;
 }
 
-fieldset {
+/* 批次块 */
+.batch-block, fieldset {
     background: #fff;
     margin: 10px 0;
     padding: 10px;
@@ -48,6 +57,30 @@ fieldset {
     border: 1px solid #ccc;
 }
 
+/* 横向复选框 */
+.checkbox-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 18px;
+    margin-bottom: 6px;
+}
+.checkbox-row input[type="checkbox"] {
+    transform: scale(1.5);
+}
+
+/* 输入行 */
+.input-row {
+    display: flex;
+    align-items: center;
+    font-size: 18px;
+}
+.input-row input {
+    margin-left: 10px;
+    flex: 1;
+}
+
+/* 表格 */
 table {
     border-collapse: collapse;
     margin: 10px auto;
@@ -62,6 +95,7 @@ td, th {
     text-align: center;
 }
 
+/* 短信框 */
 pre {
     background: #fff;
     padding: 10px;
