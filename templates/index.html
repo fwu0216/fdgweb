@@ -12,6 +12,10 @@
   <button type="submit">计算</button>
 </form>
 
+{% if error_msg %}
+  <p style="color: red;">{{ error_msg }}</p>
+{% endif %}
+
 {% if results %}
   <h3>结果</h3>
   {% for batch_name, batch_data in batches %}
