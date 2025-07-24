@@ -1,6 +1,6 @@
 body { 
     font-family: Arial, sans-serif; 
-    margin: 20px; 
+    margin: 10px; 
     background: #f4f4f4; 
     font-size: 18px;
 }
@@ -8,52 +8,66 @@ body {
 header { 
     background: #333; 
     color: white; 
-    padding: 10px; 
-}
-
-header a { 
-    color: #ffd700; 
-    margin: 0 10px; 
-    font-size: 18px;
-}
-
-table { 
-    border-collapse: collapse; 
-    margin-top: 10px; 
-    background: white; 
-    width: 100%;
-    font-size: 18px;
-}
-
-td, th { 
-    border: 1px solid #ccc; 
-    padding: 10px; 
+    padding: 15px; 
     text-align: center;
 }
 
-fieldset { 
-    background: #fff; 
-    margin: 10px 0; 
-    padding: 10px; 
-    border-radius: 5px; 
+h1, h2, h3, h4 { 
+    text-align: center;
+    font-weight: normal;
 }
 
 button { 
     padding: 14px 22px; 
     font-size: 18px; 
-    margin-top: 10px; 
+    margin: 10px 5px;
     background-color: #007BFF;
     color: white;
     border: none;
     border-radius: 5px;
+    cursor: pointer;
 }
 
-input { 
-    font-size: 18px; 
+button:hover {
+    background-color: #0056b3;
+}
+
+input {
+    font-size: 18px;
     padding: 8px;
     margin: 4px 0;
+    width: 60%;
+    max-width: 200px;
 }
 
-h2, h3, h4 { 
-    font-size: 20px;
+fieldset {
+    background: #fff;
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+table {
+    border-collapse: collapse;
+    margin: 10px auto;
+    background: white;
+    font-size: 18px;
+    width: 95%;
+}
+
+td, th {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: center;
+}
+
+pre {
+    background: #fff;
+    padding: 10px;
+    border-radius: 5px;
+    white-space: pre-wrap;
+    word-break: break-all;
+    margin: 10px;
+    border: 1px solid #ccc;
 }
