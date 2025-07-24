@@ -1,5 +1,4 @@
 from flask import Flask, render_template, request
-
 from datetime import datetime, timedelta
 
 app = Flask(__name__)
@@ -43,22 +42,37 @@ def calculate_batches(weights, coeff=0.15, interval=30,
 def index():
     results = []
     batches = []
-    if request.method == "POST":
-        coeff = float(request.form.get("coeff", 0.15))
-        weights = [float(x) for x in request.form.get("weights", "").split() if x.strip()]
-        batch1_max = int(request.form.get("batch1_max", 8))
-        enable_batch2 = request.form.get("enable_batch2") == "on"
-        batch2_max = int(request.form.get("batch2_max", 6)) if enable_batch2 else 0
-        enable_batch3 = request.form.get("enable_batch3") == "on"
-        batch3_max = int(request.form.get("batch3_max", 3)) if enable_batch3 else 0
+    error_msg = ""
 
-        batches, results = calculate_batches(weights, coeff,
-                                              batch1_max=batch1_max,
-                                              batch2_max=batch2_max,
-                                              batch3_max=batch3_max,
-                                              enable_batch2=enable_batch2,
-                                              enable_batch3=enable_batch3)
-    return render_template("index.html", results=results, batches=batches)
+    if request.method == "POST":
+        try:
+            coeff = float(request.form.get("coeff", 0.15))
+            weights_input = request.form.get("weights", "").strip()
+            if not weights_input:
+                raise ValueError("请至少输入一个体重（用空格分隔）")
+
+            weights = [float(x) for x in weights_input.split() if x.strip()]
+            batch1_max = int(request.form.get("batch1_max", 8))
+            enable_batch2 = request.form.get("enable_batch2") == "on"
+            batch2_max = int(request.form.get("batch2_max", 6)) if enable_batch2 else 0
+            enable_batch3 = request.form.get("enable_batch3") == "on"
+            batch3_max = int(request.form.get("batch3_max", 3)) if enable_batch3 else 0
+
+            # 避免总人数超过体重数量
+            total_requested = batch1_max + (batch2_max if enable_batch2 else 0) + (batch3_max if enable_batch3 else 0)
+            if total_requested > len(weights):
+                weights = weights[:total_requested]
+
+            batches, results = calculate_batches(weights, coeff,
+                                                  batch1_max=batch1_max,
+                                                  batch2_max=batch2_max,
+                                                  batch3_max=batch3_max,
+                                                  enable_batch2=enable_batch2,
+                                                  enable_batch3=enable_batch3)
+        except Exception as e:
+            error_msg = f"错误: {str(e)}"
+
+    return render_template("index.html", results=results, batches=batches, error_msg=error_msg)
 
 @app.route("/sms", methods=["GET", "POST"])
 def sms():
