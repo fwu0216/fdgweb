@@ -77,12 +77,15 @@ def index():
 
             elif form_type == "sms":
                 sms_parts = []
+                # 定义圈数字，用于第1️⃣、2️⃣、3️⃣批
+                circle_nums = ["①", "②", "③"]
                 for i in range(1, 4):
                     if request.form.get(f"enable_batch{i}") == "on":
                         dose = request.form.get(f"dose{i}", "0")
                         scale = request.form.get(f"scale{i}", "")
                         arrive = request.form.get(f"arrive{i}", "")
-                        sms_parts.append(f"第{i}批需要FDG {dose}mCi，刻度到{scale}\n{arrive}左右送达")
+                        # 使用圈数字
+                        sms_parts.append(f"第{circle_nums[i]}批需要FDG {dose}mCi，刻度到{scale}\n{arrive}左右送达")
                 if sms_parts:
                     sms_text = "FDG\n" + "\n".join(sms_parts)
 
