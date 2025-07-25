@@ -27,7 +27,6 @@ button {
     border-radius: 5px;
     cursor: pointer;
 }
-
 button:hover {
     background-color: #0056b3;
 }
@@ -38,6 +37,21 @@ input {
     margin: 4px 0;
     width: 60%;
     max-width: 200px;
+}
+
+/* 左对齐布局 for 第二批/第三批 */
+.batch-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 8px 0;
+    justify-content: flex-start;
+}
+.batch-row input[type="number"] {
+    width: 80px;
+}
+.batch-row input[type="checkbox"] {
+    transform: scale(1.2);
 }
 
 fieldset {
@@ -55,7 +69,6 @@ table {
     font-size: 18px;
     width: 95%;
 }
-
 td, th {
     border: 1px solid #ccc;
     padding: 8px;
@@ -70,25 +83,4 @@ pre {
     word-break: break-all;
     margin: 10px;
     border: 1px solid #ccc;
-}
-
-/* 新增：让第二批和第三批行左对齐 */
-.batch-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;           /* 勾选框、文字和输入框之间的间距 */
-    margin: 5px 0;
-}
-
-.batch-row input[type="checkbox"] {
-    transform: scale(1.3);  /* 可选：让勾选框更大，更适合手机 */
-}
-
-.batch-row label {
-    font-size: 18px;
-}
-
-.batch-row input[type="number"] {
-    width: 70px;          /* 控制人数输入框的宽度 */
-    font-size: 18px;
 }
