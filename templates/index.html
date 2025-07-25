@@ -104,6 +104,12 @@
   <h3>廊坊订药短信生成</h3>
   <form method="POST" id="sms-form">
     <input type="hidden" name="form_type" value="sms">
+
+    <!-- 日期选择器（默认明天） -->
+    <label>订药日期:
+      <input type="date" name="order_date" value="{{ default_date }}">
+    </label><br>
+
     {% for i in range(1, 4) %}
       <fieldset>
         <legend>第{{ i }}批</legend>
