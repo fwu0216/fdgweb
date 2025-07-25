@@ -45,19 +45,30 @@
       <input type="number" name="batch1_max" value="{{ request.form.get('batch1_max', 8) }}">
     </label><br>
 
-    <!-- 第二批、第三批采用 batch-row 样式，左对齐 -->
-    <div class="batch-row">
-      <input type="checkbox" name="enable_batch2"
-        {% if request.form.get('enable_batch2', 'on') == 'on' %}checked{% endif %}>
-      <span>启用第二批 第二批人数:</span>
-      <input type="number" name="batch2_max" value="{{ request.form.get('batch2_max', 6) }}">
+    <!-- 第二批横排布局 -->
+    <div style="display:flex; align-items:center; gap:8px; flex-wrap:nowrap; margin:8px 0;">
+      <label style="flex:1; display:flex; align-items:center; gap:5px;">
+        <input type="checkbox" name="enable_batch2" 
+          {% if request.form.get('enable_batch2', 'on') == 'on' %}checked{% endif %}>
+        启用第二批
+      </label>
+      <label style="flex:1; display:flex; align-items:center; gap:5px;">
+        第二批人数:
+        <input type="number" name="batch2_max" style="flex:1;" value="{{ request.form.get('batch2_max', 6) }}">
+      </label>
     </div>
 
-    <div class="batch-row">
-      <input type="checkbox" name="enable_batch3"
-        {% if request.form.get('enable_batch3', 'on') == 'on' %}checked{% endif %}>
-      <span>启用第三批 第三批人数:</span>
-      <input type="number" name="batch3_max" value="{{ request.form.get('batch3_max', 3) }}">
+    <!-- 第三批横排布局 -->
+    <div style="display:flex; align-items:center; gap:8px; flex-wrap:nowrap; margin:8px 0;">
+      <label style="flex:1; display:flex; align-items:center; gap:5px;">
+        <input type="checkbox" name="enable_batch3" 
+          {% if request.form.get('enable_batch3', 'on') == 'on' %}checked{% endif %}>
+        启用第三批
+      </label>
+      <label style="flex:1; display:flex; align-items:center; gap:5px;">
+        第三批人数:
+        <input type="number" name="batch3_max" style="flex:1;" value="{{ request.form.get('batch3_max', 3) }}">
+      </label>
     </div>
 
     <button type="submit">计算</button>
@@ -154,35 +165,33 @@ window.addEventListener('load', () => {
     showTab(tab);
 });
 
-// 动态体重输入管理
+// 动态添加/减少患者输入
+let weightCount = {{ weight_fields|length if weight_fields else 3 }};
 function addWeight() {
-  const container = document.getElementById("weights-container");
-  const currentInputs = container.querySelectorAll('input[name^="weight"]');
-  const nextIndex = currentInputs.length + 1;
-
-  const newField = document.createElement("div");
-  newField.innerHTML = `<label>体重${nextIndex}: 
-      <input type="number" name="weight${nextIndex}" step="0.1">
-    </label><br>`;
-  container.appendChild(newField);
-
-  localStorage.setItem('weightCount', nextIndex);
+    weightCount += 1;
+    const container = document.getElementById("weights-container");
+    const newField = document.createElement("div");
+    newField.innerHTML = `<label>体重${weightCount}: 
+        <input type="number" name="weight${weightCount}" step="0.1">
+      </label><br>`;
+    container.appendChild(newField);
+    localStorage.setItem('weightCount', weightCount);
 }
 function removePatient() {
-  const container = document.getElementById("weights-container");
-  const currentInputs = container.querySelectorAll('input[name^="weight"]');
-  if (currentInputs.length > 1) {
-    currentInputs[currentInputs.length - 1].parentNode.remove();
-    localStorage.setItem('weightCount', currentInputs.length - 1);
-  }
+    const container = document.getElementById("weights-container");
+    if (container.children.length > 1) {
+        container.removeChild(container.lastElementChild);
+        weightCount -= 1;
+        localStorage.setItem('weightCount', weightCount);
+    }
 }
 window.addEventListener('load', () => {
-  const container = document.getElementById("weights-container");
-  const savedCount = parseInt(localStorage.getItem('weightCount') || "3");
-  const currentCount = container.querySelectorAll('input[name^="weight"]').length;
-  for (let i = currentCount + 1; i <= savedCount; i++) {
-    addWeight();
-  }
+    const savedCount = localStorage.getItem('weightCount');
+    if (savedCount && savedCount > weightCount) {
+        for (let i = weightCount + 1; i <= savedCount; i++) {
+            addWeight();
+        }
+    }
 });
 
 // 表单保存和恢复
