@@ -41,11 +41,14 @@ def calculate_batches(weights, coeff=0.15, interval=30,
 @app.route("/", methods=["GET", "POST"])
 def index():
     results, batches, sms_text, error_msg = [], [], "", ""
+    # 默认三批设置
     default_batches = [
         {"enabled": True, "dose": 200, "scale_time": "9:00", "arrive_time": "8:10"},
         {"enabled": True, "dose": 110, "scale_time": "11:20", "arrive_time": "10:30"},
         {"enabled": True, "dose": 30, "scale_time": "13:20", "arrive_time": "13:00"}
     ]
+    # 默认日期：当前日期 +1 天
+    default_date = (datetime.now() + timedelta(days=1)).strftime("%Y-%m-%d")
 
     if request.method == "POST":
         form_type = request.form.get("form_type", "calc")
@@ -76,18 +79,20 @@ def index():
                                                       enable_batch3=enable_batch3)
 
             elif form_type == "sms":
+                # 日期选择器值，如果没选就用默认
+                order_date = request.form.get("order_date") or default_date
                 sms_parts = []
-                # 定义圈数字，用于第1️⃣、2️⃣、3️⃣批
                 circle_nums = ["①", "②", "③"]
                 for i in range(1, 4):
                     if request.form.get(f"enable_batch{i}") == "on":
                         dose = request.form.get(f"dose{i}", "0")
                         scale = request.form.get(f"scale{i}", "")
                         arrive = request.form.get(f"arrive{i}", "")
-                        # 使用圈数字
                         sms_parts.append(f"第{circle_nums[i-1]}批需要FDG {dose}mCi，刻度到{scale}\n{arrive}左右送达")
                 if sms_parts:
-                    sms_text = "FDG\n" + "\n".join(sms_parts)
+                    # 在短信前加日期和医院名
+                    date_str = datetime.strptime(order_date, "%Y-%m-%d").strftime("%Y年%m月%d日")
+                    sms_text = f"{date_str} 肿瘤医院\nFDG\n" + "\n".join(sms_parts)
 
         except Exception as e:
             error_msg = f"错误: {str(e)}"
@@ -95,7 +100,8 @@ def index():
     return render_template("index.html",
                            results=results, batches=batches,
                            sms_text=sms_text, error_msg=error_msg,
-                           default_batches=default_batches)
+                           default_batches=default_batches,
+                           default_date=default_date)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
