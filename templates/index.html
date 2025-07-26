@@ -236,5 +236,20 @@ function copySms() {
         alert("短信内容已复制！");
     });
 }
+ // 自动刷新日期为当前日期+1天（如果保存的日期已经过期）
+window.addEventListener('load', () => {
+    const dateInput = document.querySelector('#sms-form input[name="order_date"]');
+    if (dateInput) {
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(today.getDate() + 1);
+        const formatted = tomorrow.toISOString().split('T')[0];
+
+        const savedDate = dateInput.value;
+        if (!savedDate || new Date(savedDate) < today) {
+            dateInput.value = formatted;  // 重置为明天
+        }
+    }
+});
 </script>
 {% endblock %}
